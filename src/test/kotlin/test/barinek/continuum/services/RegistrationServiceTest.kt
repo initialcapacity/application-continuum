@@ -1,12 +1,12 @@
 package test.barinek.continuum.services
 
-import io.barinek.continuum.dataaccess.AccountDataGateway
-import io.barinek.continuum.dataaccess.UserDataGateway
-import io.barinek.continuum.services.RegistrationService
-import io.barinek.continuum.utils.JdbcTemplate
-import io.barinek.continuum.utils.TransactionManager
+import io.barinek.continuum.accounts.AccountDataGateway
+import io.barinek.continuum.users.UserDataGateway
+import io.barinek.continuum.accounts.RegistrationService
+import io.barinek.continuum.jdbcsupport.JdbcTemplate
+import io.barinek.continuum.jdbcsupport.TransactionManager
 import org.junit.Test
-import test.barinek.continuum.utils.TestDataSourceConfig
+import test.barinek.continuum.jdbcsupport.TestDataSourceConfig
 import kotlin.test.assertEquals
 
 class RegistrationServiceTest() {

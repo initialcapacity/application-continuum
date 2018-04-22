@@ -1,11 +1,22 @@
 package io.barinek.continuum
 
-import io.barinek.continuum.controllers.*
-import io.barinek.continuum.dataaccess.*
-import io.barinek.continuum.services.RegistrationService
-import io.barinek.continuum.utils.BasicApp
-import io.barinek.continuum.utils.JdbcTemplate
-import io.barinek.continuum.utils.TransactionManager
+import io.barinek.continuum.accounts.AccountController
+import io.barinek.continuum.accounts.AccountDataGateway
+import io.barinek.continuum.accounts.RegistrationController
+import io.barinek.continuum.accounts.RegistrationService
+import io.barinek.continuum.allocations.AllocationController
+import io.barinek.continuum.allocations.AllocationDataGateway
+import io.barinek.continuum.backlog.StoryController
+import io.barinek.continuum.backlog.StoryDataGateway
+import io.barinek.continuum.projects.ProjectController
+import io.barinek.continuum.projects.ProjectDataGateway
+import io.barinek.continuum.timesheets.TimeEntryController
+import io.barinek.continuum.timesheets.TimeEntryDataGateway
+import io.barinek.continuum.users.UserController
+import io.barinek.continuum.users.UserDataGateway
+import io.barinek.continuum.restsupport.BasicApp
+import io.barinek.continuum.jdbcsupport.JdbcTemplate
+import io.barinek.continuum.jdbcsupport.TransactionManager
 import org.eclipse.jetty.server.handler.HandlerList
 import java.util.*
 
