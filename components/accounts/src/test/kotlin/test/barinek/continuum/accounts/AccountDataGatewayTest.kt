@@ -1,15 +1,25 @@
 package test.barinek.continuum.accounts
 
 import io.barinek.continuum.accounts.AccountDataGateway
+import io.barinek.continuum.jdbcsupport.DataSourceConfig
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
-import io.barinek.continuum.testsupport.TestDataSourceConfig
+import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class AccountDataGatewayTest() {
-    val dataSource = TestDataSourceConfig().dataSource
+    val dataSource = DataSourceConfig().createDataSource("registration")
     val template = JdbcTemplate(dataSource)
     val gateway = AccountDataGateway(template)
+
+    @Before
+    fun cleanDatabase() {
+        JdbcTemplate(dataSource).apply {
+            execute("delete from projects")
+            execute("delete from accounts")
+            execute("delete from users")
+        }
+    }
 
     @Test
     fun testCreate() {

@@ -19,15 +19,19 @@ v7              Databases
 ### Database Setup
 
 ```
-mysql -uroot --execute="create database uservices_test"
-
-mysql -uroot --execute="grant all on uservices_test.* to 'uservices'@'localhost' identified by 'uservices';"
+for database_name in 'allocations' 'backlog' 'registration' 'timesheets'; do   
+    mysql -uroot --execute="drop database if exists ${database_name}_test"
+    mysql -uroot --execute="create database ${database_name}_test"
+    mysql -uroot --execute="grant all on  ${database_name}_test.* to 'uservices'@'localhost' identified by 'uservices';"
+done
 ```
 
 ### Schema Migrations
 
 ```
-flyway -url="jdbc:mysql://localhost:3306/uservices_test?user=root&password=" -locations=filesystem:databases/continuum clean migrate
+for database_name in 'allocations' 'backlog' 'registration' 'timesheets'; do
+    flyway -url="jdbc:mysql://localhost:3306/${database_name}_test?user=root&password=" -locations=filesystem:databases/${database_name}-database clean migrate
+done
 ```
 
 ### Test and Production Environment
@@ -35,7 +39,7 @@ flyway -url="jdbc:mysql://localhost:3306/uservices_test?user=root&password=" -lo
 ````
 export PORT=8081
 
-export VCAP_SERVICES='{"p-mysql": [ { "credentials": { "jdbcUrl": "jdbc:mysql://localhost:3306/uservices_test?user=root&password=&useTimezone=true&serverTimezone=UTC" }, "name": "appcontinuum"} ] }'
+export VCAP_SERVICES='{"p-mysql": [{"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/allocations_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "allocations"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/backlog_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "backlog"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/registration_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "registration"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/timesheets_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "timesheets"}]}'
 
 export REGISTRATION_SERVER_ENDPOINT=http://localhost:8883
 ````

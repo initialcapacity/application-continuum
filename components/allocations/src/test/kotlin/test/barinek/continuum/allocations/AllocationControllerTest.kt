@@ -5,10 +5,10 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import io.barinek.continuum.allocations.*
+import io.barinek.continuum.jdbcsupport.DataSourceConfig
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
 import io.barinek.continuum.restsupport.BasicApp
 import io.barinek.continuum.testsupport.TestControllerSupport
-import io.barinek.continuum.testsupport.TestDataSourceConfig
 import io.barinek.continuum.testsupport.TestScenarioSupport
 import org.apache.http.message.BasicNameValuePair
 import org.eclipse.jetty.server.handler.HandlerList
@@ -19,19 +19,22 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class AllocationControllerTest : TestControllerSupport() {
+    val dataSource = DataSourceConfig().createDataSource("allocations")
     val projectClient = mock<ProjectClient>()
 
     internal var app: BasicApp = object : BasicApp() {
         override fun getPort() = 8081
 
         override fun handlerList() = HandlerList().apply {
-            val dataSource = TestDataSourceConfig().dataSource
             addHandler(AllocationController(mapper, AllocationDataGateway(JdbcTemplate(dataSource)), projectClient))
         }
     }
 
     @Before
     fun setUp() {
+        JdbcTemplate(dataSource).apply {
+            execute("delete from allocations")
+        }
         app.start()
     }
 
@@ -42,7 +45,7 @@ class AllocationControllerTest : TestControllerSupport() {
 
     @Test
     fun testCreate() {
-        TestScenarioSupport().loadTestScenario("jacks-test-scenario")
+        TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
         whenever(projectClient.getProject(any())).thenReturn(ProjectInfo(true))
 
@@ -60,7 +63,7 @@ class AllocationControllerTest : TestControllerSupport() {
 
     @Test
     fun testFailedCreate() {
-        TestScenarioSupport().loadTestScenario("jacks-test-scenario")
+        TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
         whenever(projectClient.getProject(any())).thenReturn(ProjectInfo(false))
 
@@ -71,7 +74,7 @@ class AllocationControllerTest : TestControllerSupport() {
 
     @Test
     fun testFind() {
-        TestScenarioSupport().loadTestScenario("jacks-test-scenario")
+        TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
         val response = template.get("http://localhost:8081/allocations", BasicNameValuePair("projectId", "55432"))
         val list: List<AllocationInfo> = mapper.readValue(response, object : TypeReference<List<AllocationInfo>>() {})

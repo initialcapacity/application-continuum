@@ -1,0 +1,1 @@
+insert into users (id, name) values (4765, 'Jack'), (4766, 'Fred');

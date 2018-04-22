@@ -1,0 +1,1 @@
+insert into time_entries (id, project_id, user_id, date, hours) values (1534, 55432, 4765, '2015-05-17', 5), (2534, 55432, 4765, '2015-05-18', 3)

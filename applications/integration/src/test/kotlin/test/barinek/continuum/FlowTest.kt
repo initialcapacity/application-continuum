@@ -1,7 +1,8 @@
 package test.barinek.continuum
 
+import io.barinek.continuum.jdbcsupport.DataSourceConfig
+import io.barinek.continuum.jdbcsupport.JdbcTemplate
 import io.barinek.continuum.restsupport.RestTemplate
-import io.barinek.continuum.testsupport.TestDataSourceConfig
 import org.apache.http.message.BasicNameValuePair
 import org.junit.After
 import org.junit.Before
@@ -10,7 +11,6 @@ import java.io.File
 import kotlin.test.assertEquals
 
 class FlowTest {
-    val dataSource = TestDataSourceConfig() // cleans the database
     val template = RestTemplate()
 
     lateinit var allocations: Process
@@ -20,12 +20,27 @@ class FlowTest {
 
     @Before
     fun setUp() {
+        JdbcTemplate(DataSourceConfig().createDataSource("allocations")).apply {
+            execute("delete from allocations")
+        }
+        JdbcTemplate(DataSourceConfig().createDataSource("backlog")).apply {
+            execute("delete from stories")
+        }
+        JdbcTemplate(DataSourceConfig().createDataSource("registration")).apply {
+            execute("delete from projects")
+            execute("delete from accounts")
+            execute("delete from users")
+        }
+        JdbcTemplate(DataSourceConfig().createDataSource("timesheets")).apply {
+            execute("delete from time_entries")
+        }
+
         val userDir = System.getProperty("user.dir")
 
-        allocations = runCommand(8881, "java -jar $userDir/../allocations-server/build/libs/allocations-server-1.0-SNAPSHOT.jar", File(userDir))
-        backlog = runCommand(8882, "java -jar $userDir/../backlog-server/build/libs/backlog-server-1.0-SNAPSHOT.jar", File(userDir))
-        registration = runCommand(8883, "java -jar $userDir/../registration-server/build/libs/registration-server-1.0-SNAPSHOT.jar", File(userDir))
-        timesheets = runCommand(8884, "java -jar $userDir/../timesheets-server/build/libs/timesheets-server-1.0-SNAPSHOT.jar", File(userDir))
+        allocations = runCommand(8881, getServices("allocations"), "java -jar $userDir/../allocations-server/build/libs/allocations-server-1.0-SNAPSHOT.jar", File(userDir))
+        backlog = runCommand(8882, getServices("backlog"),"java -jar $userDir/../backlog-server/build/libs/backlog-server-1.0-SNAPSHOT.jar", File(userDir))
+        registration = runCommand(8883, getServices("registration"), "java -jar $userDir/../registration-server/build/libs/registration-server-1.0-SNAPSHOT.jar", File(userDir))
+        timesheets = runCommand(8884, getServices("timesheets"), "java -jar $userDir/../timesheets-server/build/libs/timesheets-server-1.0-SNAPSHOT.jar", File(userDir))
     }
 
     @After
@@ -108,14 +123,18 @@ class FlowTest {
 
     /// Test Support
 
+    private fun getServices(name:String) = "{ \"p-mysql\": [ { \"credentials\": { \"jdbcUrl\": \"jdbc:mysql://localhost:3306/${name}_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC\", \"name\": \"$name\"} } ] }"
+
     private fun findResponseId(response: String) = Regex("id\":(\\d+),").find(response)?.groupValues!![1]
 
-    private fun runCommand(port: Int, command: String, workingDir: File): Process {
+    private fun runCommand(port: Int, services: String, command: String, workingDir: File): Process {
         val builder = ProcessBuilder(*command.split(" ").toTypedArray())
                 .directory(workingDir)
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .redirectError(ProcessBuilder.Redirect.INHERIT)
         builder.environment()["PORT"] = port.toString()
+        builder.environment()["VCAP_SERVICES"] = services
+        builder.environment()["REGISTRATION_SERVER_ENDPOINT"] = "http://localhost:8883"
         return builder.start()
     }
 }

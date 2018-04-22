@@ -20,7 +20,7 @@ class App : BasicApp() {
     override fun getPort() = System.getenv("PORT").toInt()
 
     override fun handlerList(): HandlerList {
-        val dataSource = DataSourceConfig().createDataSource()
+        val dataSource = DataSourceConfig().createDataSource("registration")
         val transactionManager = TransactionManager(dataSource)
         val template = JdbcTemplate(dataSource)
 

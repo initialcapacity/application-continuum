@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class JdbcTemplateTest() {
-    val dataSource = DataSourceConfig().createDataSource()
+    val dataSource = DataSourceConfig().createDataSource("registration")
     val template = JdbcTemplate(dataSource)
 
     @Test

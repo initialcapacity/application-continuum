@@ -1,1 +1,0 @@
-alter table projects add column active bit(1) not null default b'1';

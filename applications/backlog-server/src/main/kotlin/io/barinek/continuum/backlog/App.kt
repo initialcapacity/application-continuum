@@ -12,7 +12,7 @@ class App : BasicApp() {
     override fun getPort() = System.getenv("PORT").toInt()
 
     override fun handlerList(): HandlerList {
-        val dataSource = DataSourceConfig().createDataSource()
+        val dataSource = DataSourceConfig().createDataSource("backlog")
         val template = JdbcTemplate(dataSource)
 
         return HandlerList().apply { // ordered

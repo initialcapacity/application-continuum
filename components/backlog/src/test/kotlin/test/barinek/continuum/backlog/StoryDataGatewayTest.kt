@@ -1,22 +1,26 @@
 package test.barinek.continuum.backlog
 
 import io.barinek.continuum.backlog.StoryDataGateway
+import io.barinek.continuum.jdbcsupport.DataSourceConfig
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
-import io.barinek.continuum.testsupport.TestDataSourceConfig
+import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class StoryDataGatewayTest() {
-    val dataSource = TestDataSourceConfig().dataSource
+    val dataSource = DataSourceConfig().createDataSource("backlog")
     val template = JdbcTemplate(dataSource)
     val gateway = StoryDataGateway(template)
 
+    @Before
+    fun cleanDatabase() {
+        JdbcTemplate(dataSource).apply {
+            execute("delete from stories")
+        }
+    }
+
     @Test
     fun testCreate() {
-        template.execute("insert into users (id, name) values (12, 'Jack')")
-        template.execute("insert into accounts (id, owner_id, name) values (1, 12, 'anAccount')")
-        template.execute("insert into projects (id, account_id, name) values (22, 1, 'aProject')")
-
         gateway.create(22L, "aStory")
 
         val foundStory = template.query("select id, project_id, name from stories", { },
@@ -29,9 +33,6 @@ class StoryDataGatewayTest() {
 
     @Test
     fun testFindBy() {
-        template.execute("insert into users (id, name) values (12, 'Jack')")
-        template.execute("insert into accounts (id, owner_id, name) values (1, 12, 'anAccount')")
-        template.execute("insert into projects (id, account_id, name) values (22, 1, 'aProject')")
         template.execute("insert into stories (id, project_id, name) values (1346, 22, 'aStory')")
 
         val story = gateway.findBy(22L)[0]

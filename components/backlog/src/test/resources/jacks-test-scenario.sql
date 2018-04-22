@@ -1,0 +1,1 @@
+insert into stories (id, project_id, name) values (876, 55432, 'An epic story'), (877, 55432, 'Another epic story');
