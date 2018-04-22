@@ -1,10 +1,17 @@
 rootProject.name = "appcontinuum"
 
-include "app"
+include "applications:allocations-server"
+include "applications:backlog-server"
+include "applications:integration"
+include "applications:registration-server"
+include "applications:timesheets-server"
 
 include "components:accounts"
+include "components:allocations"
+include "components:backlog"
 include "components:jdbc-support"
 include "components:projects"
 include "components:rest-support"
 include "components:test-support"
+include "components:timesheets"
 include "components:users"
