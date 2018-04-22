@@ -1,5 +1,11 @@
 package io.barinek.continuum
 
+import io.barinek.continuum.controllers.*
+import io.barinek.continuum.dataaccess.*
+import io.barinek.continuum.services.RegistrationService
+import io.barinek.continuum.utils.BasicApp
+import io.barinek.continuum.utils.JdbcTemplate
+import io.barinek.continuum.utils.TransactionManager
 import org.eclipse.jetty.server.handler.HandlerList
 import java.util.*
 
