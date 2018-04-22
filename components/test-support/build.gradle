@@ -1,0 +1,9 @@
+version "1.0-SNAPSHOT"
+
+dependencies {
+    compile project(":components:jdbc-support")
+    compile project(":components:rest-support")
+
+    compile 'junit:junit:4.11'
+    compile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+}

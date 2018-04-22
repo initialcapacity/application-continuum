@@ -1,0 +1,10 @@
+rootProject.name = "appcontinuum"
+
+include "app"
+
+include "components:accounts"
+include "components:jdbc-support"
+include "components:projects"
+include "components:rest-support"
+include "components:test-support"
+include "components:users"

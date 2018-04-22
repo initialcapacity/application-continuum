@@ -1,74 +1,48 @@
-group "io.barinek.continuum"
-version "1.0-SNAPSHOT"
-
 buildscript {
     ext.kotlin_version = '1.0.6'
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
-apply plugin: 'kotlin'
-apply plugin: 'application'
+subprojects {
+    group "io.barinek.continuum"
 
-mainClassName = 'io.barinek.continuum.AppKt'
+    apply plugin: 'kotlin'
 
-repositories {
-    mavenCentral()
-    jcenter()
-}
+    defaultTasks "clean", "build"
 
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-
-    compile "org.jetbrains.kotlinx:kotlinx-support-jdk8:0.3"
-
-    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.3.0.M2'
-    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.3.0.M2'
-
-    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-    compile group: 'javax.inject', name: 'javax.inject', version: '1'
-
-    compile 'com.fasterxml.jackson.core:jackson-core:2.8.4'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.4'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.8.4'
-
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.4"
-    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.4"
-
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '2.3.7'
-    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.26'
-
-    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
-    compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.3'
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3'
-
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.10'
-
-    testCompile 'junit:junit:4.11'
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = "3.3"
-}
-
-sourceSets {
-    main.kotlin.srcDir "src/main/kotlin"
-    test.kotlin.srcDir "src/test/kotlin"
-
-    test.resources.srcDir "src/test/resources"
-}
-
-jar {
-    manifest {
-        attributes "Main-Class": "io.barinek.continuum.AppKt"
+    repositories {
+        mavenCentral()
+        jcenter()
     }
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        compile "org.jetbrains.kotlinx:kotlinx-support-jdk8:0.3"
+
+        compile 'com.fasterxml.jackson.core:jackson-core:2.8.4'
+        compile 'com.fasterxml.jackson.core:jackson-databind:2.8.4'
+        compile 'com.fasterxml.jackson.core:jackson-annotations:2.8.4'
+
+        compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.4"
+        compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.4"
+
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
+        compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.10'
+
+        testCompile 'junit:junit:4.11'
+        testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    }
+
+    sourceSets {
+        main.kotlin.srcDir "src/main/kotlin"
+        test.kotlin.srcDir "src/test/kotlin"
+
+        test.resources.srcDir "src/test/resources"
     }
 }
