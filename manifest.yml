@@ -1,0 +1,9 @@
+---
+applications:
+- name: appcontinuum
+  memory: 1024M
+  instances: 1
+  host: appcontinuum
+  domain: cfapps.io
+  services:
+  - mysql
