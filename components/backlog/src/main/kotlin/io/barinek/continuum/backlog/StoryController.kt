@@ -6,13 +6,16 @@ import org.eclipse.jetty.server.Request
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class StoryController(val mapper: ObjectMapper, val gateway: StoryDataGateway) : BasicHandler() {
+class StoryController(val mapper: ObjectMapper, val gateway: StoryDataGateway, val client: ProjectClient) : BasicHandler() {
 
     override fun handle(s: String, request: Request, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse) {
         post("/stories", request, httpServletResponse) {
             val story = mapper.readValue(request.reader, StoryInfo::class.java)
-            val record = gateway.create(story.projectId, story.name)
-            mapper.writeValue(httpServletResponse.outputStream, StoryInfo(record.id, record.projectId, record.name, "story info"))
+
+            if (projectIsActive(story.projectId)) {
+                val record = gateway.create(story.projectId, story.name)
+                mapper.writeValue(httpServletResponse.outputStream, StoryInfo(record.id, record.projectId, record.name, "story info"))
+            }
         }
         get("/stories", request, httpServletResponse) {
             val projectId = request.getParameter("projectId")
@@ -23,4 +26,8 @@ class StoryController(val mapper: ObjectMapper, val gateway: StoryDataGateway) :
         }
     }
 
+    private fun projectIsActive(projectId: Long): Boolean {
+        val project = client.getProject(projectId)
+        return project != null && project.active
+    }
 }

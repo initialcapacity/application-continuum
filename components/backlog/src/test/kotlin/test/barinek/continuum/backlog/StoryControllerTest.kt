@@ -1,9 +1,10 @@
 package test.barinek.continuum.backlog
 
 import com.fasterxml.jackson.core.type.TypeReference
-import io.barinek.continuum.backlog.StoryController
-import io.barinek.continuum.backlog.StoryDataGateway
-import io.barinek.continuum.backlog.StoryInfo
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.whenever
+import io.barinek.continuum.backlog.*
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
 import io.barinek.continuum.restsupport.BasicApp
 import io.barinek.continuum.testsupport.TestControllerSupport
@@ -17,12 +18,14 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class StoryControllerTest : TestControllerSupport() {
-    private var app: BasicApp = object : BasicApp() {
+    val client = mock<ProjectClient>()
+
+    internal var app: BasicApp = object : BasicApp() {
         override fun getPort() = 8081
 
         override fun handlerList() = HandlerList().apply {
             val dataSource = TestDataSourceConfig().dataSource
-            addHandler(StoryController(mapper, StoryDataGateway(JdbcTemplate(dataSource))))
+            addHandler(StoryController(mapper, StoryDataGateway(JdbcTemplate(dataSource)), client))
         }
     }
 
@@ -40,6 +43,8 @@ class StoryControllerTest : TestControllerSupport() {
     fun testCreate() {
         TestScenarioSupport().loadTestScenario("jacks-test-scenario")
 
+        whenever(client.getProject(any())).thenReturn(ProjectInfo(true))
+
         val json = "{\"projectId\":55432,\"name\":\"An epic story\"}"
         val response = template.post("http://localhost:8081/stories", json)
         val actual = mapper.readValue(response, StoryInfo::class.java)
@@ -48,6 +53,17 @@ class StoryControllerTest : TestControllerSupport() {
         assertEquals(55432L, actual.projectId)
         assertEquals("An epic story", actual.name)
         assertEquals("story info", actual.info)
+    }
+
+    @Test
+    fun testFailedCreate() {
+        TestScenarioSupport().loadTestScenario("jacks-test-scenario")
+
+        whenever(client.getProject(any())).thenReturn(ProjectInfo(false))
+
+        val json = "{\"projectId\":55432,\"name\":\"An epic story\"}"
+        val response = template.post("http://localhost:8081/stories", json)
+        assert(response.isBlank())
     }
 
     @Test

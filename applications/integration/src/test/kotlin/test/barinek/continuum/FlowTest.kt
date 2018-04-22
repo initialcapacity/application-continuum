@@ -74,7 +74,7 @@ class FlowTest {
 
         response = template.post("$allocationsServer/allocations", """{"projectId":$aProjectId,"userId":$aUserId,"firstDay":"2015-05-17","lastDay":"2015-05-26"}""")
         val anAllocationId = findResponseId(response)
-        assert(aProjectId.toLong() > 0)
+        assert(anAllocationId.toLong() > 0)
 
         response = template.get("$allocationsServer/allocations", BasicNameValuePair("projectId", aProjectId))
         assert(!response.isNullOrEmpty())

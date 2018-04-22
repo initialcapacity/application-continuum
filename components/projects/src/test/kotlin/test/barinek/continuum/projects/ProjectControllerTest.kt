@@ -15,6 +15,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class ProjectControllerTest : TestControllerSupport() {
     private var app: BasicApp = object : BasicApp() {
@@ -47,6 +48,7 @@ class ProjectControllerTest : TestControllerSupport() {
         assertEquals(1673L, actual.accountId)
         assertEquals("aProject", actual.name)
         assertEquals("project info", actual.info)
+        assert(actual.active)
     }
 
     @Test
@@ -61,5 +63,28 @@ class ProjectControllerTest : TestControllerSupport() {
         assertEquals(1673L, actual.accountId)
         assertEquals("Flagship", actual.name)
         assertEquals("project info", actual.info)
+        assert(actual.active)
+    }
+
+    @Test
+    fun testGet() {
+        TestScenarioSupport().loadTestScenario("jacks-test-scenario")
+
+        val response = template.get("http://localhost:8081/project", BasicNameValuePair("projectId", "55431"))
+        val actual = mapper.readValue(response, ProjectInfo::class.java)
+
+        assertEquals(55431L, actual.id)
+        assertEquals(1673L, actual.accountId)
+        assertEquals("Hovercraft", actual.name)
+        assertEquals("project info", actual.info)
+        assertFalse(actual.active)
+    }
+
+    @Test
+    fun testNotFound() {
+        TestScenarioSupport().loadTestScenario("jacks-test-scenario")
+
+        val response = template.get("http://localhost:8081/project", BasicNameValuePair("projectId", "5280"))
+        assert(response.isBlank())
     }
 }

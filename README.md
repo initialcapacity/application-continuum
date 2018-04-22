@@ -36,4 +36,8 @@ flyway -url="jdbc:mysql://localhost:3306/uservices_test?user=root&password=" -lo
 export PORT=8081
 
 export VCAP_SERVICES='{"p-mysql": [ { "credentials": { "jdbcUrl": "jdbc:mysql://localhost:3306/uservices_test?user=root&password=&useTimezone=true&serverTimezone=UTC" }, "name": "appcontinuum"} ] }'
+
+export REGISTRATION_SERVER_ENDPOINT=http://localhost:8883
 ````
+
+_Note: The registration server endpoint port must match the port used in the FlowTest_

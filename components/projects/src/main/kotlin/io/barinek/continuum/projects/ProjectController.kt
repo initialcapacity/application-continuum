@@ -12,14 +12,22 @@ class ProjectController(val mapper: ObjectMapper, val gateway: ProjectDataGatewa
         post("/projects", request, httpServletResponse) {
             val project = mapper.readValue(request.reader, ProjectInfo::class.java)
             val record = gateway.create(project.accountId, project.name)
-            mapper.writeValue(httpServletResponse.outputStream, ProjectInfo(record.id, record.accountId, record.name, "project info"))
+            mapper.writeValue(httpServletResponse.outputStream, ProjectInfo(record.id, record.accountId, record.name, record.active, "project info"))
         }
         get("/projects", request, httpServletResponse) {
             val accountId = request.getParameter("accountId")
             val list = gateway.findBy(accountId.toLong()).map { record ->
-                ProjectInfo(record.id, record.accountId, record.name, "project info")
+                ProjectInfo(record.id, record.accountId, record.name, record.active, "project info")
             }
             mapper.writeValue(httpServletResponse.outputStream, list)
+        }
+        get("/project", request, httpServletResponse) {
+            val projectId = request.getParameter("projectId")
+            val record = gateway.findObject(projectId.toLong())
+            if (record != null) {
+                val project = ProjectInfo(record.id, record.accountId, record.name, record.active, "project info")
+                mapper.writeValue(httpServletResponse.outputStream, project)
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import io.barinek.continuum.jdbcsupport.DataSourceConfig
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
 import io.barinek.continuum.restsupport.BasicApp
 import io.barinek.continuum.restsupport.DefaultController
+import io.barinek.continuum.restsupport.RestTemplate
 import org.eclipse.jetty.server.handler.HandlerList
 import java.util.*
 
@@ -15,7 +16,7 @@ class App : BasicApp() {
         val template = JdbcTemplate(dataSource)
 
         return HandlerList().apply { // ordered
-            addHandler(AllocationController(mapper, AllocationDataGateway(template)))
+            addHandler(AllocationController(mapper, AllocationDataGateway(template), ProjectClient(mapper, RestTemplate())))
             addHandler(DefaultController())
         }
     }

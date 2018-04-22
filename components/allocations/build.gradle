@@ -4,8 +4,4 @@ dependencies {
     compile project(":components:jdbc-support")
     compile project(":components:rest-support")
     compile project(":components:test-support")
-
-    compile project(":components:accounts")
-    compile project(":components:projects")
-    compile project(":components:users")
 }

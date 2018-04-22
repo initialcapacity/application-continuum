@@ -1,9 +1,10 @@
 package test.barinek.continuum.allocations
 
 import com.fasterxml.jackson.core.type.TypeReference
-import io.barinek.continuum.allocations.AllocationController
-import io.barinek.continuum.allocations.AllocationDataGateway
-import io.barinek.continuum.allocations.AllocationInfo
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.whenever
+import io.barinek.continuum.allocations.*
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
 import io.barinek.continuum.restsupport.BasicApp
 import io.barinek.continuum.testsupport.TestControllerSupport
@@ -18,12 +19,14 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class AllocationControllerTest : TestControllerSupport() {
-    private var app: BasicApp = object : BasicApp() {
+    val projectClient = mock<ProjectClient>()
+
+    internal var app: BasicApp = object : BasicApp() {
         override fun getPort() = 8081
 
         override fun handlerList() = HandlerList().apply {
             val dataSource = TestDataSourceConfig().dataSource
-            addHandler(AllocationController(mapper, AllocationDataGateway(JdbcTemplate(dataSource))))
+            addHandler(AllocationController(mapper, AllocationDataGateway(JdbcTemplate(dataSource)), projectClient))
         }
     }
 
@@ -41,6 +44,8 @@ class AllocationControllerTest : TestControllerSupport() {
     fun testCreate() {
         TestScenarioSupport().loadTestScenario("jacks-test-scenario")
 
+        whenever(projectClient.getProject(any())).thenReturn(ProjectInfo(true))
+
         val json = "{\"projectId\":55432,\"userId\":4765,\"firstDay\":\"2014-05-16\",\"lastDay\":\"2014-05-26\"}"
         val response = template.post("http://localhost:8081/allocations", json)
         val actual = mapper.readValue(response, AllocationInfo::class.java)
@@ -51,6 +56,17 @@ class AllocationControllerTest : TestControllerSupport() {
         assertEquals(LocalDate.of(2014, 5, 16), actual.firstDay)
         assertEquals(LocalDate.of(2014, 5, 26), actual.lastDay)
         assertEquals("allocation info", actual.info)
+    }
+
+    @Test
+    fun testFailedCreate() {
+        TestScenarioSupport().loadTestScenario("jacks-test-scenario")
+
+        whenever(projectClient.getProject(any())).thenReturn(ProjectInfo(false))
+
+        val json = "{\"projectId\":55432,\"userId\":4765,\"firstDay\":\"2014-05-16\",\"lastDay\":\"2014-05-26\"}"
+        val response = template.post("http://localhost:8081/allocations", json)
+        assert(response.isBlank())
     }
 
     @Test
