@@ -16,6 +16,7 @@ v6              Services
 v7              Databases
 v8              Versioning
 v9              Service Discovery
+v10             Circuit Breaker
 ```
 
 ### Database Setup

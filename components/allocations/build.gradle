@@ -1,6 +1,7 @@
 version "1.0-SNAPSHOT"
 
 dependencies {
+    compile project(":components:circuit-breaker-support")
     compile project(":components:discovery-support")
     compile project(":components:jdbc-support")
     compile project(":components:rest-support")
