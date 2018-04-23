@@ -6,7 +6,9 @@ applications:
   host: allocations-appcontinuum
   domain: cfapps.io
   services:
-  - mysql
+  - allocations
+  env:
+    JAVA_OPTS: -XX:ReservedCodeCacheSize=100M -Xss228k
 
 - name: backlog
   path: applications/backlog-server/build/libs/backlog-server-1.0-SNAPSHOT.jar
@@ -15,7 +17,9 @@ applications:
   host: backlog-appcontinuum
   domain: cfapps.io
   services:
-  - mysql
+  - backlog
+  env:
+    JAVA_OPTS: -XX:ReservedCodeCacheSize=100M -Xss228k
 
 - name: registration
   path: applications/registration-server/build/libs/registration-server-1.0-SNAPSHOT.jar
@@ -24,7 +28,9 @@ applications:
   host: registration-appcontinuum
   domain: cfapps.io
   services:
-  - mysql
+  - registration
+  env:
+    JAVA_OPTS: -XX:ReservedCodeCacheSize=100M -Xss228k
 
 - name: timesheets
   path: applications/timesheets-server/build/libs/timesheets-server-1.0-SNAPSHOT.jar
@@ -33,4 +39,17 @@ applications:
   host: timesheets-appcontinuum
   domain: cfapps.io
   services:
-  - mysql
+  - timesheets
+  env:
+    JAVA_OPTS: -XX:ReservedCodeCacheSize=100M -Xss228k
+
+- name: discovery
+  path: applications/discovery-server/build/libs/discovery-server-1.0-SNAPSHOT.jar
+  memory: 256M
+  instances: 1
+  host: discovery-appcontinuum
+  domain: cfapps.io
+  services:
+  - discovery
+  env:
+    JAVA_OPTS: -XX:ReservedCodeCacheSize=100M -Xss228k

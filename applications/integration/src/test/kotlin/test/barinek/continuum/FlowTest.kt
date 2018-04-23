@@ -2,6 +2,7 @@ package test.barinek.continuum
 
 import io.barinek.continuum.jdbcsupport.DataSourceConfig
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
+import io.barinek.continuum.redissupport.RedisConfig
 import io.barinek.continuum.restsupport.RestTemplate
 import org.apache.http.message.BasicNameValuePair
 import org.junit.After
@@ -13,6 +14,7 @@ import kotlin.test.assertEquals
 class FlowTest {
     val template = RestTemplate()
 
+    lateinit var discovery: Process
     lateinit var allocations: Process
     lateinit var backlog: Process
     lateinit var registration: Process
@@ -20,6 +22,14 @@ class FlowTest {
 
     @Before
     fun setUp() {
+        val userDir = System.getProperty("user.dir")
+
+        RedisConfig().getPool("discovery").resource.flushAll()
+
+        discovery = runCommand(8888, getServices("discovery"), "java -jar $userDir/../discovery-server/build/libs/discovery-server-1.0-SNAPSHOT.jar", File(userDir))
+
+        ///
+
         JdbcTemplate(DataSourceConfig().createDataSource("allocations")).apply {
             execute("delete from allocations")
         }
@@ -35,8 +45,6 @@ class FlowTest {
             execute("delete from time_entries")
         }
 
-        val userDir = System.getProperty("user.dir")
-
         allocations = runCommand(8881, getServices("allocations"), "java -jar $userDir/../allocations-server/build/libs/allocations-server-1.0-SNAPSHOT.jar", File(userDir))
         backlog = runCommand(8882, getServices("backlog"),"java -jar $userDir/../backlog-server/build/libs/backlog-server-1.0-SNAPSHOT.jar", File(userDir))
         registration = runCommand(8883, getServices("registration"), "java -jar $userDir/../registration-server/build/libs/registration-server-1.0-SNAPSHOT.jar", File(userDir))
@@ -45,6 +53,7 @@ class FlowTest {
 
     @After
     fun tearDown() {
+        discovery.destroy()
         allocations.destroy()
         backlog.destroy()
         registration.destroy()
@@ -56,6 +65,12 @@ class FlowTest {
         Thread.sleep(4000) // sorry, waiting for servers to start
 
         var response: String?
+
+        val discoveryServer = "http://localhost:8888"
+        response = template.get(discoveryServer, "application/json")
+        assertEquals("Noop!", response)
+
+        ///
 
         val registrationServer = "http://localhost:8883"
 
@@ -123,7 +138,7 @@ class FlowTest {
 
     /// Test Support
 
-    private fun getServices(name:String) = "{ \"p-mysql\": [ { \"credentials\": { \"jdbcUrl\": \"jdbc:mysql://localhost:3306/${name}_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC\", \"name\": \"$name\"} } ] }"
+    private fun getServices(name:String) = "{ \"rediscloud\": [{\"credentials\": {\"hostname\": \"localhost\", \"password\": \"foobared\", \"port\": 6379}, \"name\": \"$name\"}], \"p-mysql\": [ { \"credentials\": { \"jdbcUrl\": \"jdbc:mysql://localhost:3306/${name}_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC\", \"name\": \"$name\"} } ] }"
 
     private fun findResponseId(response: String) = Regex("id\":(\\d+),").find(response)?.groupValues!![1]
 
@@ -134,7 +149,7 @@ class FlowTest {
                 .redirectError(ProcessBuilder.Redirect.INHERIT)
         builder.environment()["PORT"] = port.toString()
         builder.environment()["VCAP_SERVICES"] = services
-        builder.environment()["REGISTRATION_SERVER_ENDPOINT"] = "http://localhost:8883"
+        builder.environment()["DISCOVERY_SERVER_ENDPOINT"] = "http://localhost:8888"
         return builder.start()
     }
 }

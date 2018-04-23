@@ -2,10 +2,12 @@ version "1.0-SNAPSHOT"
 
 dependencies {
     compile project(":components:jdbc-support")
+    compile project(":components:redis-support")
     compile project(":components:rest-support")
 
     compile project(":applications:allocations-server")
     compile project(":applications:backlog-server")
+    compile project(":applications:discovery-server")
     compile project(":applications:registration-server")
     compile project(":applications:timesheets-server")
 }

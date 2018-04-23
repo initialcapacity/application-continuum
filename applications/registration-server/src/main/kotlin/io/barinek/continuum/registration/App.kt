@@ -4,6 +4,7 @@ import io.barinek.continuum.accounts.AccountController
 import io.barinek.continuum.accounts.AccountDataGateway
 import io.barinek.continuum.accounts.RegistrationController
 import io.barinek.continuum.accounts.RegistrationService
+import io.barinek.continuum.discovery.DiscoveryClient
 import io.barinek.continuum.jdbcsupport.DataSourceConfig
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
 import io.barinek.continuum.jdbcsupport.TransactionManager
@@ -12,10 +13,13 @@ import io.barinek.continuum.projects.ProjectControllerV2
 import io.barinek.continuum.projects.ProjectDataGateway
 import io.barinek.continuum.restsupport.BasicApp
 import io.barinek.continuum.restsupport.DefaultController
+import io.barinek.continuum.restsupport.RestTemplate
 import io.barinek.continuum.users.UserController
 import io.barinek.continuum.users.UserDataGateway
 import org.eclipse.jetty.server.handler.HandlerList
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class App : BasicApp() {
     override fun getPort() = System.getenv("PORT").toInt()
@@ -36,6 +40,13 @@ class App : BasicApp() {
             addHandler(ProjectControllerV2(mapper, ProjectDataGateway(template)))
             addHandler(DefaultController())
         }
+    }
+
+    override fun start() {
+        super.start()
+        Executors.newSingleThreadScheduledExecutor(Executors.defaultThreadFactory()).scheduleAtFixedRate({
+            DiscoveryClient(mapper, RestTemplate()).heartbeat("registration", server.uri.toString())
+        }, 0L, 30L, TimeUnit.SECONDS)
     }
 }
 

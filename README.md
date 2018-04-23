@@ -15,6 +15,7 @@ v5              Applications
 v6              Services
 v7              Databases
 v8              Versioning
+v9              Service Discovery
 ```
 
 ### Database Setup
@@ -40,9 +41,9 @@ done
 ````
 export PORT=8081
 
-export VCAP_SERVICES='{"p-mysql": [{"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/allocations_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "allocations"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/backlog_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "backlog"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/registration_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "registration"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/timesheets_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "timesheets"}]}'
+export VCAP_SERVICES='{"p-mysql": [{"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/allocations_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "allocations"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/backlog_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "backlog"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/registration_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "registration"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/timesheets_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "timesheets"}], "rediscloud": [{"credentials": {"hostname": "localhost", "password": "foobared", "port": 6379}, "name": "discovery"}]}'
 
-export REGISTRATION_SERVER_ENDPOINT=http://localhost:8883
+export DISCOVERY_SERVER_ENDPOINT=http://localhost:8888
 ````
 
 _Note: The registration server endpoint port must match the port used in the FlowTest_
