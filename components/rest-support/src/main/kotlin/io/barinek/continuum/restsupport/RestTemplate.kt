@@ -10,14 +10,17 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.message.BasicNameValuePair
 
 class RestTemplate {
-    fun get(endpoint: String, vararg pairs: BasicNameValuePair) = execute {
+    fun get(endpoint: String, accept: String, vararg pairs: BasicNameValuePair) = execute {
         val builder = URIBuilder(endpoint)
         pairs.forEach { pair -> builder.addParameter(pair.name, pair.value) }
-        HttpGet(builder.build())
+        HttpGet(builder.build()).apply {
+            addHeader("Accept", accept)
+        }
     }
 
-    fun post(endpoint: String, data: String) = execute {
+    fun post(endpoint: String, accept: String, data: String) = execute {
         HttpPost(endpoint).apply {
+            addHeader("Accept", accept)
             addHeader("Content-type", "application/json")
             entity = StringEntity(data)
         }

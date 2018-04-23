@@ -14,6 +14,7 @@ v4              Components
 v5              Applications
 v6              Services
 v7              Databases
+v8              Versioning
 ```
 
 ### Database Setup

@@ -59,65 +59,65 @@ class FlowTest {
 
         val registrationServer = "http://localhost:8883"
 
-        response = template.get(registrationServer)
+        response = template.get(registrationServer, "application/json")
         assertEquals("Noop!", response)
 
-        response = template.post("$registrationServer/registration", """{"name": "aUser"}""")
+        response = template.post("$registrationServer/registration", "application/json", """{"name": "aUser"}""")
         val aUserId = findResponseId(response)
         assert(aUserId.toLong() > 0)
 
-        response = template.get("$registrationServer/users", BasicNameValuePair("userId", aUserId))
+        response = template.get("$registrationServer/users", "application/json", BasicNameValuePair("userId", aUserId))
         assert(!response.isNullOrEmpty())
 
-        response = template.get("$registrationServer/accounts", BasicNameValuePair("ownerId", aUserId))
+        response = template.get("$registrationServer/accounts", "application/json", BasicNameValuePair("ownerId", aUserId))
         val anAccountId = findResponseId(response)
         assert(anAccountId.toLong() > 0)
 
-        response = template.post("$registrationServer/projects", """{"accountId":"$anAccountId","name":"aProject"}""")
+        response = template.post("$registrationServer/projects", "application/vnd.appcontinuum.v2+json", """{"accountId":"$anAccountId","name":"aProject","active":true,"funded":true}""")
         val aProjectId = findResponseId(response)
         assert(aProjectId.toLong() > 0)
 
-        response = template.get("$registrationServer/projects", BasicNameValuePair("accountId", anAccountId))
+        response = template.get("$registrationServer/projects", "application/vnd.appcontinuum.v2+json", BasicNameValuePair("accountId", anAccountId))
         assert(!response.isNullOrEmpty())
 
         ///
 
         val allocationsServer = "http://localhost:8881"
 
-        response = template.get(allocationsServer)
+        response = template.get(allocationsServer, "application/json")
         assertEquals("Noop!", response)
 
-        response = template.post("$allocationsServer/allocations", """{"projectId":$aProjectId,"userId":$aUserId,"firstDay":"2015-05-17","lastDay":"2015-05-26"}""")
+        response = template.post("$allocationsServer/allocations", "application/json", """{"projectId":$aProjectId,"userId":$aUserId,"firstDay":"2015-05-17","lastDay":"2015-05-26"}""")
         val anAllocationId = findResponseId(response)
         assert(anAllocationId.toLong() > 0)
 
-        response = template.get("$allocationsServer/allocations", BasicNameValuePair("projectId", aProjectId))
+        response = template.get("$allocationsServer/allocations", "application/json", BasicNameValuePair("projectId", aProjectId))
         assert(!response.isNullOrEmpty())
 
 
         val backlogServer = "http://localhost:8882"
 
-        response = template.get(backlogServer)
+        response = template.get(backlogServer, "application/json")
         assertEquals("Noop!", response)
 
-        response = template.post("$backlogServer/stories", """{"projectId":$aProjectId,"name":"A story"}""")
+        response = template.post("$backlogServer/stories", "application/json", """{"projectId":$aProjectId,"name":"A story"}""")
         val aStoryId = findResponseId(response)
         assert(aStoryId.toLong() > 0)
 
-        response = template.get("$backlogServer/stories", BasicNameValuePair("projectId", aProjectId))
+        response = template.get("$backlogServer/stories", "application/json", BasicNameValuePair("projectId", aProjectId))
         assert(!response.isNullOrEmpty())
 
 
         val timesheetsServer = "http://localhost:8884"
 
-        response = template.get(timesheetsServer)
+        response = template.get(timesheetsServer, "application/json")
         assertEquals("Noop!", response)
 
-        response = template.post("$timesheetsServer/time-entries", """{"projectId":$aProjectId,"userId":$aUserId,"date":"2015-05-17","hours":"8"}""")
+        response = template.post("$timesheetsServer/time-entries", "application/json", """{"projectId":$aProjectId,"userId":$aUserId,"date":"2015-05-17","hours":"8"}""")
         val aTimeEntryId = findResponseId(response)
         assert(aTimeEntryId.toLong() > 0)
 
-        response = template.get("$timesheetsServer/time-entries", BasicNameValuePair("userId", aUserId))
+        response = template.get("$timesheetsServer/time-entries", "application/json", BasicNameValuePair("userId", aUserId))
         assert(!response.isNullOrEmpty())
     }
 

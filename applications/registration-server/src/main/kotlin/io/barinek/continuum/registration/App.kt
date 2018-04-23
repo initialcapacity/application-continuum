@@ -7,7 +7,8 @@ import io.barinek.continuum.accounts.RegistrationService
 import io.barinek.continuum.jdbcsupport.DataSourceConfig
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
 import io.barinek.continuum.jdbcsupport.TransactionManager
-import io.barinek.continuum.projects.ProjectController
+import io.barinek.continuum.projects.ProjectControllerV1
+import io.barinek.continuum.projects.ProjectControllerV2
 import io.barinek.continuum.projects.ProjectDataGateway
 import io.barinek.continuum.restsupport.BasicApp
 import io.barinek.continuum.restsupport.DefaultController
@@ -31,7 +32,8 @@ class App : BasicApp() {
             addHandler(RegistrationController(mapper, RegistrationService(transactionManager, userDataGateway, accountDataGateway)))
             addHandler(AccountController(mapper, accountDataGateway))
             addHandler(UserController(mapper, userDataGateway))
-            addHandler(ProjectController(mapper, ProjectDataGateway(template)))
+            addHandler(ProjectControllerV1(mapper, ProjectDataGateway(template)))
+            addHandler(ProjectControllerV2(mapper, ProjectDataGateway(template)))
             addHandler(DefaultController())
         }
     }

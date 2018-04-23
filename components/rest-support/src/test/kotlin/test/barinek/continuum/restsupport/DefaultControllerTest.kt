@@ -32,7 +32,7 @@ class DefaultControllerTest {
 
     @Test
     fun testGet() {
-        val response = template.get("http://localhost:8081/")
+        val response = template.get("http://localhost:8081/", "*/*")
         assertEquals("Noop!", response)
     }
 }

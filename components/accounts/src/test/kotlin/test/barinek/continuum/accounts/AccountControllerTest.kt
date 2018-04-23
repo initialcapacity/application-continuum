@@ -47,7 +47,7 @@ class AccountControllerTest : TestControllerSupport() {
         TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
         val ownerId = BasicNameValuePair("ownerId", "4765")
-        val response = template.get("http://localhost:8081/accounts", ownerId)
+        val response = template.get("http://localhost:8081/accounts", "application/json", ownerId)
         val list: List<AccountInfo> = mapper.readValue(response, object : TypeReference<List<AccountInfo>>() {})
         val actual = list.first()
 

@@ -3,9 +3,9 @@ package test.barinek.continuum.projects
 import com.fasterxml.jackson.core.type.TypeReference
 import io.barinek.continuum.jdbcsupport.DataSourceConfig
 import io.barinek.continuum.jdbcsupport.JdbcTemplate
-import io.barinek.continuum.projects.ProjectController
+import io.barinek.continuum.projects.ProjectControllerV1
 import io.barinek.continuum.projects.ProjectDataGateway
-import io.barinek.continuum.projects.ProjectInfo
+import io.barinek.continuum.projects.ProjectInfoV1
 import io.barinek.continuum.restsupport.BasicApp
 import io.barinek.continuum.testsupport.TestControllerSupport
 import io.barinek.continuum.testsupport.TestScenarioSupport
@@ -17,14 +17,14 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
-class ProjectControllerTest : TestControllerSupport() {
+class ProjectControllerV1Test : TestControllerSupport() {
     val dataSource = DataSourceConfig().createDataSource("registration")
 
-    private var app: BasicApp = object : BasicApp() {
+    internal var app: BasicApp = object : BasicApp() {
         override fun getPort() = 8081
 
         override fun handlerList() = HandlerList().apply {
-            addHandler(ProjectController(mapper, ProjectDataGateway(JdbcTemplate(dataSource))))
+            addHandler(ProjectControllerV1(mapper, ProjectDataGateway(JdbcTemplate(dataSource))))
         }
     }
 
@@ -48,8 +48,8 @@ class ProjectControllerTest : TestControllerSupport() {
         TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
         val json = "{\"accountId\":1673,\"name\":\"aProject\"}"
-        val response = template.post("http://localhost:8081/projects", json)
-        val actual = mapper.readValue(response, ProjectInfo::class.java)
+        val response = template.post("http://localhost:8081/projects", "application/vnd.appcontinuum.v1+json", json)
+        val actual = mapper.readValue(response, ProjectInfoV1::class.java)
 
         assertEquals(1673L, actual.accountId)
         assertEquals("aProject", actual.name)
@@ -61,8 +61,8 @@ class ProjectControllerTest : TestControllerSupport() {
     fun testList() {
         TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
-        val response = template.get("http://localhost:8081/projects", BasicNameValuePair("accountId", "1673"))
-        val list: List<ProjectInfo> = mapper.readValue(response, object : TypeReference<List<ProjectInfo>>() {})
+        val response = template.get("http://localhost:8081/projects", "application/vnd.appcontinuum.v1+json", BasicNameValuePair("accountId", "1673"))
+        val list: List<ProjectInfoV1> = mapper.readValue(response, object : TypeReference<List<ProjectInfoV1>>() {})
         val actual = list.first()
 
         assertEquals(55432L, actual.id)
@@ -76,8 +76,8 @@ class ProjectControllerTest : TestControllerSupport() {
     fun testGet() {
         TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
-        val response = template.get("http://localhost:8081/project", BasicNameValuePair("projectId", "55431"))
-        val actual = mapper.readValue(response, ProjectInfo::class.java)
+        val response = template.get("http://localhost:8081/project", "application/vnd.appcontinuum.v1+json", BasicNameValuePair("projectId", "55431"))
+        val actual = mapper.readValue(response, ProjectInfoV1::class.java)
 
         assertEquals(55431L, actual.id)
         assertEquals(1673L, actual.accountId)
@@ -90,7 +90,7 @@ class ProjectControllerTest : TestControllerSupport() {
     fun testNotFound() {
         TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
-        val response = template.get("http://localhost:8081/project", BasicNameValuePair("projectId", "5280"))
+        val response = template.get("http://localhost:8081/project", "application/vnd.appcontinuum.v1+json", BasicNameValuePair("projectId", "5280"))
         assert(response.isBlank())
     }
 }

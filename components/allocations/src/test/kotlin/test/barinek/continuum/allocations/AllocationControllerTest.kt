@@ -50,7 +50,7 @@ class AllocationControllerTest : TestControllerSupport() {
         whenever(projectClient.getProject(any())).thenReturn(ProjectInfo(true))
 
         val json = "{\"projectId\":55432,\"userId\":4765,\"firstDay\":\"2014-05-16\",\"lastDay\":\"2014-05-26\"}"
-        val response = template.post("http://localhost:8081/allocations", json)
+        val response = template.post("http://localhost:8081/allocations", "application/json", json)
         val actual = mapper.readValue(response, AllocationInfo::class.java)
 
         assert(actual.id > 0)
@@ -68,7 +68,7 @@ class AllocationControllerTest : TestControllerSupport() {
         whenever(projectClient.getProject(any())).thenReturn(ProjectInfo(false))
 
         val json = "{\"projectId\":55432,\"userId\":4765,\"firstDay\":\"2014-05-16\",\"lastDay\":\"2014-05-26\"}"
-        val response = template.post("http://localhost:8081/allocations", json)
+        val response = template.post("http://localhost:8081/allocations", "application/json", json)
         assert(response.isBlank())
     }
 
@@ -76,7 +76,7 @@ class AllocationControllerTest : TestControllerSupport() {
     fun testFind() {
         TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
-        val response = template.get("http://localhost:8081/allocations", BasicNameValuePair("projectId", "55432"))
+        val response = template.get("http://localhost:8081/allocations", "application/json", BasicNameValuePair("projectId", "55432"))
         val list: List<AllocationInfo> = mapper.readValue(response, object : TypeReference<List<AllocationInfo>>() {})
         val actual = list.first()
 

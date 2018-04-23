@@ -47,10 +47,10 @@ class TimeEntryControllerTest : TestControllerSupport() {
     fun testCreate() {
         TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
-        whenever(client.getProject(any())).thenReturn(ProjectInfo(true))
+        whenever(client.getProject(any())).thenReturn(ProjectInfo(true, true))
 
         val json = "{\"projectId\":55432,\"userId\":4765,\"date\":\"2015-05-17\",\"hours\":8}"
-        val response = template.post("http://localhost:8081/time-entries", json)
+        val response = template.post("http://localhost:8081/time-entries", "application/json", json)
 
         val actual = mapper.readValue(response, TimeEntryInfo::class.java)
 
@@ -64,10 +64,10 @@ class TimeEntryControllerTest : TestControllerSupport() {
     fun testFailedCreate() {
         TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
-        whenever(client.getProject(any())).thenReturn(ProjectInfo(false))
+        whenever(client.getProject(any())).thenReturn(ProjectInfo(true, false))
 
         val json = "{\"projectId\":55432,\"userId\":4765,\"date\":\"2015-05-17\",\"hours\":8}"
-        val response = template.post("http://localhost:8081/time-entries", json)
+        val response = template.post("http://localhost:8081/time-entries", "application/json", json)
         assert(response.isBlank())
     }
 
@@ -75,7 +75,7 @@ class TimeEntryControllerTest : TestControllerSupport() {
     fun testFind() {
         TestScenarioSupport(dataSource).loadTestScenario("jacks-test-scenario")
 
-        val response = template.get("http://localhost:8081/time-entries", BasicNameValuePair("userId", "4765"))
+        val response = template.get("http://localhost:8081/time-entries", "application/json", BasicNameValuePair("userId", "4765"))
         val stories: List<TimeEntryInfo> = mapper.readValue(response, object : TypeReference<List<TimeEntryInfo>>() {})
         val actual = stories.first()
 

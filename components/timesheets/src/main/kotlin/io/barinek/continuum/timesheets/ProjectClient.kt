@@ -7,7 +7,7 @@ import org.apache.http.message.BasicNameValuePair
 open class ProjectClient(val mapper: ObjectMapper, val template: RestTemplate) {
     open fun getProject(projectId: Long): ProjectInfo? {
         val endpoint = System.getenv("REGISTRATION_SERVER_ENDPOINT")
-        val response = template.get("$endpoint/project", BasicNameValuePair("projectId", projectId.toString()))
+        val response = template.get("$endpoint/project", "application/vnd.appcontinuum.v2+json", BasicNameValuePair("projectId", projectId.toString()))
         when {
             response.isBlank() -> return null
 

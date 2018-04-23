@@ -7,32 +7,44 @@ import java.sql.SQLException
 import javax.servlet.http.HttpServletResponse
 
 abstract class BasicHandler : AbstractHandler() {
-    fun post(uri: String, request: Request, httpServletResponse: HttpServletResponse, block: () -> Unit) {
+    fun post(uri: String, supportedMediaTypes: List<String>, request: Request, httpServletResponse: HttpServletResponse, block: () -> Unit) {
         if (request.method == HttpMethod.POST.toString()) {
             if (uri == request.requestURI) {
-                httpServletResponse.contentType = "application/json"
-                try {
-                    httpServletResponse.status = HttpServletResponse.SC_CREATED
-                    block()
-                } catch (e: SQLException) {
-                    httpServletResponse.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                val acceptedMediaType = request.getHeader("Accept")
+
+                for (supportedMediaType in supportedMediaTypes) {
+                    if (supportedMediaType == acceptedMediaType) {
+                        httpServletResponse.contentType = supportedMediaType
+                        try {
+                            httpServletResponse.status = HttpServletResponse.SC_CREATED
+                            block()
+                        } catch (e: SQLException) {
+                            httpServletResponse.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                        }
+                        request.isHandled = true
+                    }
                 }
-                request.isHandled = true
             }
         }
     }
 
-    fun get(uri: String, request: Request, httpServletResponse: HttpServletResponse, block: () -> Unit) {
+    fun get(uri: String, supportedMediaTypes: List<String>, request: Request, httpServletResponse: HttpServletResponse, block: () -> Unit) {
         if (request.method == HttpMethod.GET.toString()) {
             if (uri == request.requestURI) {
-                httpServletResponse.contentType = "application/json"
-                try {
-                    httpServletResponse.status = HttpServletResponse.SC_OK
-                    block()
-                } catch (e: SQLException) {
-                    httpServletResponse.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                val acceptedMediaType = request.getHeader("Accept")
+
+                for (supportedMediaType in supportedMediaTypes) {
+                    if (supportedMediaType == acceptedMediaType) {
+                        httpServletResponse.contentType = supportedMediaType
+                        try {
+                            httpServletResponse.status = HttpServletResponse.SC_OK
+                            block()
+                        } catch (e: SQLException) {
+                            httpServletResponse.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                        }
+                        request.isHandled = true
+                    }
                 }
-                request.isHandled = true
             }
         }
     }
