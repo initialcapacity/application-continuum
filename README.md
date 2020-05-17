@@ -21,11 +21,37 @@ v10             Circuit Breaker
 
 ### Database Setup
 
+#### Redis
 ```
-for database_name in 'allocations' 'backlog' 'registration' 'timesheets'; do   
+brew install redis
+```
+
+Modify /usr/local/etc/redis.conf
+
+```
+requirepass foobared
+```
+
+#### MySQL
+```
+brew install mysql
+```
+
+Modify /usr/local/etc/my.cnf
+
+```
+default-time-zone='+00:00'
+```
+
+```
+mysql -uroot --execute="drop user 'uservices'@'localhost'"
+mysql -uroot --execute="create user 'uservices'@'localhost' identified by 'uservices';"
+
+for database_name in 'allocations' 'backlog' 'registration' 'timesheets'; do
     mysql -uroot --execute="drop database if exists ${database_name}_test"
     mysql -uroot --execute="create database ${database_name}_test"
-    mysql -uroot --execute="grant all on  ${database_name}_test.* to 'uservices'@'localhost' identified by 'uservices';"
+    mysql -uroot --execute="grant all on  ${database_name}_test.* to 'uservices'@'localhost';"
+    mysql -uroot --execute="grant select on performance_schema.* to 'uservices'@'localhost';"
 done
 ```
 
@@ -33,7 +59,7 @@ done
 
 ```
 for database_name in 'allocations' 'backlog' 'registration' 'timesheets'; do
-    flyway -url="jdbc:mysql://localhost:3306/${database_name}_test?user=root&password=" -locations=filesystem:databases/${database_name}-database clean migrate
+    flyway -user=uservices -password=uservices -url="jdbc:mysql://localhost:3306/${database_name}_test" -locations=filesystem:databases/${database_name}-database clean migrate
 done
 ```
 
@@ -42,7 +68,7 @@ done
 ````
 export PORT=8081
 
-export VCAP_SERVICES='{"p-mysql": [{"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/allocations_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "allocations"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/backlog_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "backlog"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/registration_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "registration"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/timesheets_test?user=uservices&password=uservices&useTimezone=true&serverTimezone=UTC"}, "name": "timesheets"}], "rediscloud": [{"credentials": {"hostname": "localhost", "password": "foobared", "port": 6379}, "name": "discovery"}]}'
+export VCAP_SERVICES='{"p-mysql": [{"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/allocations_test?user=uservices&password=uservices"}, "name": "allocations"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/backlog_test?user=uservices&password=uservices"}, "name": "backlog"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/registration_test?user=uservices&password=uservices"}, "name": "registration"}, {"credentials": {"jdbcUrl": "jdbc:mysql://localhost:3306/timesheets_test?user=uservices&password=uservices"}, "name": "timesheets"}], "rediscloud": [{"credentials": {"hostname": "localhost", "password": "foobared", "port": 6379}, "name": "discovery"}]}'
 
 export DISCOVERY_SERVER_ENDPOINT=http://localhost:8888
 ````
