@@ -1,10 +1,12 @@
 package test.barinek.continuum.circuitbreaker
 
 import io.barinek.continuum.circuitbreaker.CircuitBreaker
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
+import java.util.concurrent.ConcurrentHashMap
 
 class CircuitBreakerTest {
     @Test
@@ -38,6 +40,19 @@ class CircuitBreakerTest {
         val actual = circuitBreaker.withCircuitBreaker(
             { fail(); Thread.sleep(0); true }, { false })
         assertFalse(actual)
+    }
+
+    @Test
+    fun testReusesWorkerThreadAcrossCalls() {
+        val circuitBreaker = CircuitBreaker(1000)
+        val threadsUsed = ConcurrentHashMap.newKeySet<String>()
+
+        for (i in 1..50) {
+            circuitBreaker.withCircuitBreaker(
+                { threadsUsed.add(Thread.currentThread().name); true }, { false })
+        }
+
+        assertEquals(1, threadsUsed.size)
     }
 
     @Test
