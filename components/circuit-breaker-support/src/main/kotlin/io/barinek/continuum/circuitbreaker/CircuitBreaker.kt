@@ -7,10 +7,16 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
-class CircuitBreaker(private val timeoutInMillis: Long = 200, private val maxFailures: Int = 3, private val retryIntervalInMillis: Long = 300, private val maxConcurrentCalls: Int = 10) {
+class CircuitBreaker(
+        private val timeoutInMillis: Long = 200,
+        private val maxFailures: Int = 3,
+        private val retryIntervalInMillis: Long = 300,
+        maxConcurrentCalls: Int = 10
+) {
     private var currentFailures: Int = 0
     private var lastFailureInMillis: Long = 0
-    private val executor = ThreadPoolExecutor(0, maxConcurrentCalls, 60L, TimeUnit.SECONDS, SynchronousQueue(), daemonThreadFactory())
+    private val executor = ThreadPoolExecutor(
+            0, maxConcurrentCalls, idleWorkerTimeoutInSeconds, TimeUnit.SECONDS, SynchronousQueue(), daemonThreadFactory())
 
     private fun open() = currentFailures >= maxFailures
     private fun shouldRetry() = (lastFailureInMillis + retryIntervalInMillis) < currentTimeMillis()
@@ -47,6 +53,7 @@ class CircuitBreaker(private val timeoutInMillis: Long = 200, private val maxFai
     }
 
     private companion object {
+        const val idleWorkerTimeoutInSeconds = 60L
         val threadCount = AtomicLong()
     }
 }
