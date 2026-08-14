@@ -1,12 +1,14 @@
 package io.barinek.continuum.circuitbreaker
 
 import java.lang.System.currentTimeMillis
-import java.util.concurrent.Executors
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 class CircuitBreaker(private val timeoutInMillis: Long = 200, private val maxFailures: Int = 3, private val retryIntervalInMillis: Long = 300, private val maxConcurrentCalls: Int = 10) {
     private var currentFailures: Int = 0
     private var lastFailureInMillis: Long = 0
+    private val executor = ThreadPoolExecutor(0, maxConcurrentCalls, 60L, TimeUnit.SECONDS, SynchronousQueue())
 
     private fun open() = currentFailures >= maxFailures
     private fun shouldRetry() = (lastFailureInMillis + retryIntervalInMillis) < currentTimeMillis()
@@ -15,7 +17,7 @@ class CircuitBreaker(private val timeoutInMillis: Long = 200, private val maxFai
 
         if (open() && !shouldRetry()) return fallback()
 
-        val future = Executors.newSingleThreadExecutor().submit(function)
+        val future = executor.submit(function)
 
         return try {
             future.get(timeoutInMillis, TimeUnit.MILLISECONDS).apply {
