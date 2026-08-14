@@ -6,6 +6,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class CircuitBreakerTest {
     @Test
@@ -54,6 +56,28 @@ class CircuitBreakerTest {
         }
 
         assertTrue("used ${threadsUsed.size} threads for 50 calls", threadsUsed.size <= maxConcurrentCalls)
+    }
+
+    @Test
+    fun testCapsThreadsWhenCallsOverlap() {
+        val maxConcurrentCalls = 2
+        val circuitBreaker = CircuitBreaker(2000, 100, 300, maxConcurrentCalls)
+        val threadsUsed = ConcurrentHashMap.newKeySet<Thread>()
+        val release = CountDownLatch(1)
+        val submitted = CountDownLatch(8)
+
+        val callers = (1..8).map {
+            Thread {
+                circuitBreaker.withCircuitBreaker(
+                    { threadsUsed.add(Thread.currentThread()); release.await(2, TimeUnit.SECONDS) }, { false })
+            }.apply { isDaemon = true; start(); submitted.countDown() }
+        }
+        submitted.await(2, TimeUnit.SECONDS)
+        Thread.sleep(200)
+        release.countDown()
+        callers.forEach { it.join(5000) }
+
+        assertTrue("used ${threadsUsed.size} threads for 8 overlapping calls", threadsUsed.size <= maxConcurrentCalls)
     }
 
     @Test
