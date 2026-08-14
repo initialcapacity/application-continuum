@@ -59,6 +59,25 @@ class CircuitBreakerTest {
     }
 
     @Test
+    fun testReleasesTheWorkerWhenACallTimesOut() {
+        val circuitBreaker = CircuitBreaker(50, 100, 300, 1)
+        val interrupted = CountDownLatch(1)
+
+        val actual = circuitBreaker.withCircuitBreaker({
+            try {
+                Thread.sleep(5000)
+                false
+            } catch (e: InterruptedException) {
+                interrupted.countDown()
+                false
+            }
+        }, { true })
+
+        assertTrue(actual)
+        assertTrue("timed out work was left running", interrupted.await(2, TimeUnit.SECONDS))
+    }
+
+    @Test
     fun testCapsThreadsWhenCallsOverlap() {
         val maxConcurrentCalls = 2
         val circuitBreaker = CircuitBreaker(2000, 100, 300, maxConcurrentCalls)
