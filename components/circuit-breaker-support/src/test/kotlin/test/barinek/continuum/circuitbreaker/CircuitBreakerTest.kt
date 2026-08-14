@@ -57,6 +57,16 @@ class CircuitBreakerTest {
     }
 
     @Test
+    fun testWorkerThreadsDoNotKeepTheJvmAlive() {
+        val circuitBreaker = CircuitBreaker(1000)
+
+        val actual = circuitBreaker.withCircuitBreaker(
+            { Thread.currentThread().isDaemon }, { false })
+
+        assertTrue(actual)
+    }
+
+    @Test
     fun testReset() {
         val circuitBreaker = CircuitBreaker(10, 3, 300)
 
