@@ -1,7 +1,6 @@
 package test.barinek.continuum.circuitbreaker
 
 import io.barinek.continuum.circuitbreaker.CircuitBreaker
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -43,16 +42,18 @@ class CircuitBreakerTest {
     }
 
     @Test
-    fun testReusesWorkerThreadAcrossCalls() {
-        val circuitBreaker = CircuitBreaker(1000)
+    fun testBoundsWorkerThreadsRegardlessOfCallCount() {
+        val maxConcurrentCalls = 4
+        val circuitBreaker = CircuitBreaker(1000, 3, 300, maxConcurrentCalls)
         val threadsUsed = ConcurrentHashMap.newKeySet<String>()
 
         for (i in 1..50) {
-            circuitBreaker.withCircuitBreaker(
+            val actual = circuitBreaker.withCircuitBreaker(
                 { threadsUsed.add(Thread.currentThread().name); true }, { false })
+            assertTrue(actual)
         }
 
-        assertEquals(1, threadsUsed.size)
+        assertTrue("used ${threadsUsed.size} threads for 50 calls", threadsUsed.size <= maxConcurrentCalls)
     }
 
     @Test

@@ -4,7 +4,7 @@ import java.lang.System.currentTimeMillis
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class CircuitBreaker(private val timeoutInMillis: Long = 200, private val maxFailures: Int = 3, private val retryIntervalInMillis: Long = 300) {
+class CircuitBreaker(private val timeoutInMillis: Long = 200, private val maxFailures: Int = 3, private val retryIntervalInMillis: Long = 300, private val maxConcurrentCalls: Int = 10) {
     private var currentFailures: Int = 0
     private var lastFailureInMillis: Long = 0
 
