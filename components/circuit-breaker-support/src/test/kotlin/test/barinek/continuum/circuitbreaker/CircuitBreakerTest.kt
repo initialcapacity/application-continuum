@@ -45,11 +45,11 @@ class CircuitBreakerTest {
     fun testBoundsWorkerThreadsRegardlessOfCallCount() {
         val maxConcurrentCalls = 4
         val circuitBreaker = CircuitBreaker(1000, 3, 300, maxConcurrentCalls)
-        val threadsUsed = ConcurrentHashMap.newKeySet<String>()
+        val threadsUsed = ConcurrentHashMap.newKeySet<Thread>()
 
         for (i in 1..50) {
             val actual = circuitBreaker.withCircuitBreaker(
-                { threadsUsed.add(Thread.currentThread().name); true }, { false })
+                { threadsUsed.add(Thread.currentThread()); true }, { false })
             assertTrue(actual)
         }
 
